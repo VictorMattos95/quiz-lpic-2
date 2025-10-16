@@ -5,19 +5,88 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz Interativo de Linux - Modo Prova</title>
     <style>
-        /* CSS Geral (maioria sem alterações) */
+        /* --- NOVOS ESTILOS DE LAYOUT --- */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #f4f7f6;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
+            display: flex; /* Alterado */
             margin: 0;
-            padding: 20px;
+            min-height: 100vh;
             box-sizing: border-box;
         }
 
+        #side-menu {
+            width: 240px;
+            flex-shrink: 0;
+            background-color: #ffffff;
+            border-right: 1px solid #e0e0e0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+        }
+
+        #side-menu h3 {
+            text-align: center;
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        #nav-container {
+            flex-grow: 1;
+            overflow-y: auto; /* Permite rolar os botões */
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); /* 5 botões por linha */
+            gap: 8px;
+            align-content: start; /* Alinha os botões no topo */
+            padding-right: 10px; /* Espaço para a barra de rolagem */
+        }
+
+        .nav-item {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 35px;
+            font-size: 0.9em;
+            border: 1px solid #ddd;
+            border-radius: 50%; /* Botões redondos */
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: bold;
+            color: #555;
+            background-color: #f9f9f9;
+        }
+
+        .nav-item:hover {
+            background-color: #eef2f5;
+            border-color: #007bff;
+        }
+
+        .nav-item.answered {
+            background-color: #e6ffed;
+            border-color: #155724;
+            color: #155724;
+        }
+
+        .nav-item.current {
+            background-color: #d1e7fd;
+            border-color: #007bff;
+            color: #0056b3;
+            transform: scale(1.1);
+        }
+
+        #main-content {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto; /* Permite rolar o quiz se for alto */
+        }
+        
+        /* --- ESTILOS ANTIGOS DO QUIZ --- */
         #quiz-container {
             background-color: #ffffff;
             border-radius: 10px;
@@ -97,6 +166,18 @@
             border-radius: 4px;
         }
         
+        pre code {
+            display: block;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            color: #333;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
         /* --- ESTILOS PARA O RELATÓRIO FINAL --- */
         #final-report h2, #final-report h3 { text-align: center; color: #333; }
         #final-report p { text-align: center; font-size: 1.2em; margin-bottom: 25px; }
@@ -121,8 +202,16 @@
 </head>
 <body>
 
-    <div id="quiz-container">
-        </div>
+    <nav id="side-menu">
+        <h3>Questões</h3>
+        <div id="nav-container">
+            </div>
+    </nav>
+
+    <main id="main-content">
+        <div id="quiz-container">
+            </div>
+    </main>
 
 <script>
     const quizData = [
@@ -153,7 +242,7 @@
       },
       {
         "id": 3,
-        "pergunta": "Qual comando é usado para enviar mensagens a todos os usuários atualmente logados? (Especifique SOMENTE o comando, sem caminho ou parâmetros.)",
+        "pergunta": "Qual comando é usado para enviar mensagens a todos os usuários Lohia, atualmente logados? (Especifique SOMENTE o comando, sem caminho ou parâmetros.)",
         "tipo": "fill",
         "respostaCorreta": "wall",
         "explicacao": "O comando 'wall' (write to all) envia uma mensagem para o terminal de todos os usuários que estão logados no sistema."
@@ -256,7 +345,7 @@
       },
       {
         "id": 12,
-        "pergunta": "Quais informações são encontradas no seguinte trecho do arquivo <code>/proc/mdstat</code>? (Escolha duas.)<br><pre><code>Personalities : [raid6] [raid5] [raid4]\nmd0 : active raid5 sdb1[3] (S) sdc1[7] sda1[4] (S) sdd1[6] sde1[5]\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1046528 blocks super 1.2 level 5, 512k chunk, algorithm 2 [3/2] [UU_]\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[===>.......] recovery = 15.9% (83808/523264) finish=0.1min\nspeed=71880K/sec\nunused devices: &lt;none&gt;</code></pre>",
+        "pergunta": "Quais informações são encontradas no seguinte trecho do arquivo <code>/proc/mdstat</code>? (Escolha duas.)<br><pre><code>Personalities : [raid6] [raid5] [raid4]\nmd0 : active raid5 sdb1[3] (S) sdc1[7] sdal[4] (S) sdd1[6] sde1[5]\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1046528 blocks super 1.2 level 5, 512k chunk, algorithm 2 [3/2] [UU_]\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[===>..........] recovery = 15.9% (83808/523264) finish=0.1min\nspeed=71880K/sec\nunused devices: &lt;none&gt;</code></pre>",
         "opcoes": {
           "A": "Um dos discos em /dev/md0 falhou e um disco reserva é usado para recriar a redundância completa",
           "B": "O disco reserva /dev/sda1 é usado para restaurar a redundância completa após a recuperação atual",
@@ -836,11 +925,6 @@
 
 
     // --- CÓDIGO DE EMBARALHAMENTO ---
-
-    /**
-     * Algoritmo Fisher-Yates para embaralhar um array in-place.
-     * @param {Array} array - O array a ser embaralhado.
-     */
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -848,21 +932,14 @@
         }
     }
 
-    /**
-     * Processa o quizData para embaralhar as opções de múltipla escolha
-     * e remapear as respostas corretas.
-     * @param {Array} data - O array quizData.
-     */
     function shuffleQuizData(data) {
-        const labels = ['A', 'B', 'C', 'D', 'E', 'F']; // Suporta até 6 opções
+        const labels = ['A', 'B', 'C', 'D', 'E', 'F']; 
 
         data.forEach(question => {
-            // Ignora questões de preenchimento (fill-in-the-blank)
             if (question.tipo === 'fill' || !question.opcoes) {
                 return;
             }
 
-            // 1. Converter objeto de opções em array [ { text, isCorrect } ]
             const originalAnswers = Array.isArray(question.respostaCorreta) 
                 ? question.respostaCorreta 
                 : [question.respostaCorreta];
@@ -872,26 +949,22 @@
                 isCorrect: originalAnswers.includes(key)
             }));
 
-            // 2. Embaralhar o array
             shuffleArray(optionsList);
 
-            // 3. Reconstruir o objeto 'opcoes' e o array 'respostaCorreta'
             const newOpcoes = {};
             const newRespostaCorreta = [];
             const originalWasArray = Array.isArray(question.respostaCorreta);
 
             optionsList.forEach((option, index) => {
-                const newKey = labels[index]; // A, B, C...
+                const newKey = labels[index];
                 newOpcoes[newKey] = option.text;
                 if (option.isCorrect) {
                     newRespostaCorreta.push(newKey);
                 }
             });
 
-            // 4. Atualizar a questão original
             question.opcoes = newOpcoes;
             
-            // Preserva o tipo original (string para resposta única, array para múltipla)
             if (originalWasArray || newRespostaCorreta.length > 1) {
                 question.respostaCorreta = newRespostaCorreta;
             } else {
@@ -900,16 +973,69 @@
         });
     }
 
-    // Executa o embaralhamento ANTES de renderizar o quiz
     shuffleQuizData(quizData);
-
-    // --- FIM DO CÓDIGO DE EMBARALHAMENTO ---
-
 
     // --- LÓGICA PRINCIPAL DO QUIZ ---
     const quizContainer = document.getElementById('quiz-container');
     let currentQuestionIndex = 0;
     let answerLog = new Array(quizData.length).fill(null);
+
+    // --- NOVAS FUNÇÕES DE NAVEGAÇÃO ---
+
+    /**
+     * Popula o menu lateral de navegação com botões para cada questão.
+     */
+    function populateNavMenu() {
+        const navContainer = document.getElementById('nav-container');
+        let navHTML = '';
+        for (let i = 0; i < quizData.length; i++) {
+            navHTML += `<div class="nav-item" data-index="${i}">${i + 1}</div>`;
+        }
+        navContainer.innerHTML = navHTML;
+
+        // Adiciona event listeners aos novos botões
+        navContainer.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                jumpToQuestion(parseInt(item.dataset.index));
+            });
+        });
+    }
+
+    /**
+     * Pula para uma questão específica com base no índice.
+     * @param {number} index - O índice da questão (0 a 59).
+     */
+    function jumpToQuestion(index) {
+        if (index >= 0 && index < quizData.length) {
+            currentQuestionIndex = index;
+            renderQuiz();
+        }
+    }
+
+    /**
+     * Atualiza o estado visual (cores) do menu de navegação.
+     * Marca a questão atual e as questões já respondidas.
+     */
+    function updateSideMenuState() {
+        for (let i = 0; i < quizData.length; i++) {
+            const item = document.querySelector(`.nav-item[data-index="${i}"]`);
+            if (!item) continue;
+
+            // Limpa estados anteriores
+            item.classList.remove('current', 'answered');
+
+            // Adiciona classe 'answered' se a resposta não for nula
+            if (answerLog[i] !== null) {
+                item.classList.add('answered');
+            }
+            // Adiciona classe 'current' se for a questão ativa
+            if (i === currentQuestionIndex) {
+                item.classList.add('current');
+            }
+        }
+    }
+
+    // --- FUNÇÕES EXISTENTES (MODIFICADAS) ---
 
     function renderQuiz() {
         const currentQuestion = quizData[currentQuestionIndex];
@@ -939,6 +1065,7 @@
         
         addEventListeners();
         updateUIState();
+        updateSideMenuState(); // MODIFICADO: Atualiza o menu lateral
     }
 
     function addEventListeners() {
@@ -953,6 +1080,7 @@
             fillAnswerInput.addEventListener('input', (event) => {
                 answerLog[currentQuestionIndex] = event.target.value.trim() || null;
                 updateUIState();
+                updateSideMenuState(); // MODIFICADO: Atualiza o menu ao digitar
             });
             fillAnswerInput.addEventListener('keyup', (event) => {
                 if (event.key === 'Enter' && !document.getElementById('next-btn').disabled) {
@@ -987,6 +1115,7 @@
         answerLog[currentQuestionIndex] = selectedKeys.length > 0 ? selectedKeys : null;
         
         updateUIState();
+        updateSideMenuState(); // MODIFICADO: Atualiza o menu ao selecionar
     }
 
     function logAnswerAndAdvance() {
@@ -1006,6 +1135,10 @@
     }
 
     function showFinalReport() {
+        // MODIFICADO: Esconde o menu lateral e centraliza o relatório
+        document.getElementById('side-menu').style.display = 'none';
+        document.getElementById('main-content').style.justifyContent = 'center';
+
         let correctAnswers = 0;
         let detailedReviewHTML = '';
 
@@ -1018,7 +1151,7 @@
             
             let isCorrect = false;
             if (question.tipo === 'fill') {
-                isCorrect = userAnswer && (userAnswer === correctAnswer[0]); // Correção de case-sensitive
+                isCorrect = userAnswer && (userAnswer === correctAnswer[0]);
             } else {
                 isCorrect = JSON.stringify(sortedUserAnswer) === JSON.stringify(sortedCorrectAnswer);
             }
@@ -1073,7 +1206,8 @@
         `;
     }
 
-    // Inicia o quiz pela primeira vez
+    // MODIFICADO: Inicia o quiz e popula o menu
+    populateNavMenu();
     renderQuiz();
 </script>
 
