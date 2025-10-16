@@ -1316,7 +1316,7 @@
         feedbackContainer.innerHTML = feedbackHTML;
     }
 
-    // --- FUNÇÃO MODIFICADA PARA PONTUAÇÃO PARCIAL ---
+    // --- FUNÇÃO MODIFICADA PARA PONTUAÇÃO NÃO-PUNITIVA ---
     function showFinalReport() {
         document.getElementById('side-menu').style.display = 'none';
         document.getElementById('main-content').style.justifyContent = 'center';
@@ -1331,6 +1331,9 @@
             let questionScore = 0.0;
             let isFullyCorrect = false; // Para o feedback visual (Certo/Errado)
 
+            // Garante que userAnswer seja um array, mesmo se for null
+            const userAnswerAsArray = Array.isArray(userAnswer) ? [...userAnswer] : (userAnswer ? [userAnswer] : []);
+
             if (question.tipo === 'fill') {
                 // Questões de preenchimento são tudo-ou-nada
                 isFullyCorrect = userAnswer && (userAnswer === correctAnswer[0]);
@@ -1339,39 +1342,31 @@
                 }
             } else {
                 // Questões de múltipla escolha (podem ser únicas ou várias)
-                const isMulti = Array.isArray(question.respostaCorreta);
                 const totalCorrectNeeded = correctAnswer.length;
-                
-                // Garante que userAnswer seja um array, mesmo se for null ou string
-                const userAnswerAsArray = Array.isArray(userAnswer) ? [...userAnswer] : (userAnswer ? [userAnswer] : []);
                 const sortedCorrectAnswer = [...correctAnswer].sort();
                 
                 // Verifica acerto de 100% para o visual (antes da pontuação parcial)
                 const sortedUserAnswer = [...userAnswerAsArray].sort();
                 isFullyCorrect = JSON.stringify(sortedUserAnswer) === JSON.stringify(sortedCorrectAnswer);
 
-                if (!isMulti) {
+                if (totalCorrectNeeded === 1) { 
                     // Escolha única é tudo-ou-nada
                     if (isFullyCorrect) {
                         questionScore = 1.0;
                     }
                 } else {
-                    // --- NOVA LÓGICA DE PONTUAÇÃO PARCIAL ---
+                    // --- NOVA LÓGICA DE PONTUAÇÃO (NÃO PUNITIVA) ---
                     let correctSelectedCount = 0;
-                    let incorrectSelectedCount = 0;
 
                     userAnswerAsArray.forEach(ans => {
                         if (correctAnswer.includes(ans)) {
                             correctSelectedCount++;
-                        } else {
-                            incorrectSelectedCount++;
                         }
+                        // Não há penalidade por seleção incorreta
                     });
                     
-                    // Pontuação = (Acertos - Erros) / Total de Corretas
-                    // O mínimo é 0 (não há pontuação negativa por questão)
-                    let score = (correctSelectedCount - incorrectSelectedCount) / totalCorrectNeeded;
-                    questionScore = Math.max(0, score);
+                    // Pontuação = (Acertos / Total de Corretas)
+                    questionScore = (correctSelectedCount / totalCorrectNeeded);
                 }
             }
 
@@ -1388,7 +1383,8 @@
             }
             
             const correctAnswerText = correctAnswer.join(', ');
-            const resultClass = isFullyCorrect ? 'resposta-certa' : 'resposta-errada';
+            // O feedback visual ainda é "tudo ou nada"
+            const resultClass = isFullyCorrect ? 'resposta-certa' : 'resposta-errada'; 
 
             detailedReviewHTML += `
                 <div class="review-item">
@@ -1404,7 +1400,7 @@
         
         // Cálculos finais usam 'totalScore' (float)
         const correctAnswersFloat = totalScore;
-        const incorrectAnswersFloat = totalQuestions - totalScore;
+        const incorrectAnswersFloat = totalQuestions - totalScore; // Renomeado para "Pontos Perdidos"
         const correctPercentage = ((totalScore / totalQuestions) * 100).toFixed(1);
         const incorrectPercentage = (100.0 - parseFloat(correctPercentage)).toFixed(1);
         const finalGrade = ((totalScore / totalQuestions) * 10).toFixed(1);
