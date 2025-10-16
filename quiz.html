@@ -256,7 +256,7 @@
       },
       {
         "id": 12,
-        "pergunta": "Quais informações são encontradas no seguinte trecho do arquivo <code>/proc/mdstat</code>? (Escolha duas.)<br><pre><code>Personalities : [raid6] [raid5] [raid4]\nmd0 : active raid5 sdb1[3](S) sdc1[1] sda1[0]\n      1046528 blocks super 1.2 level 5, 512k chunk, algorithm 2 [3/2] [UU_]\n      recovery = 15.9% (83808/523264) finish=0.1min speed=71880K/sec\nunused devices: &lt;none&gt;</code></pre>",
+        "pergunta": "Quais informações são encontradas no seguinte trecho do arquivo <code>/proc/mdstat</code>? (Escolha duas.)<br><pre><code>Personalities : [raid6] [raid5] [raid4]\nmd0 : active raid5 sdb1[3] (S) sdc1[7] sda1[4] (S) sdd1[6] sde1[5]\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1046528 blocks super 1.2 level 5, 512k chunk, algorithm 2 [3/2] [UU_]\n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[===>.......] recovery = 15.9% (83808/523264) finish=0.1min\nspeed=71880K/sec\nunused devices: &lt;none&gt;</code></pre>",
         "opcoes": {
           "A": "Um dos discos em /dev/md0 falhou e um disco reserva é usado para recriar a redundância completa",
           "B": "O disco reserva /dev/sda1 é usado para restaurar a redundância completa após a recuperação atual",
