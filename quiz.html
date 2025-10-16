@@ -13,6 +13,8 @@
             margin: 0;
             min-height: 100vh;
             box-sizing: border-box;
+            /* NOVO: Prepara para transição */
+            transition: transform 0.3s ease;
         }
 
         #side-menu {
@@ -24,6 +26,8 @@
             display: flex;
             flex-direction: column;
             box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+            /* NOVO: Transição para o slide */
+            transition: transform 0.3s ease;
         }
 
         #side-menu h3 {
@@ -84,9 +88,10 @@
             align-items: center;
             padding: 20px;
             overflow-y: auto;
+            width: 100%; /* NOVO */
         }
         
-        /* --- ESTILOS ANTIGOS DO QUIZ --- */
+        /* --- ESTILOS DO QUIZ (Sem alteração) --- */
         #quiz-container {
             background-color: #ffffff;
             border-radius: 10px;
@@ -178,14 +183,14 @@
             word-wrap: break-word;
         }
         
-        /* --- NOVOS ESTILOS DE FEEDBACK --- */
+        /* --- ESTILOS DE FEEDBACK (Sem alteração) --- */
         #feedback-container {
             margin-top: 20px;
             padding: 15px;
             border-radius: 8px;
             font-size: 1.1em;
             line-height: 1.5;
-            display: none; /* Começa escondido */
+            display: none;
         }
         
         #feedback-container.feedback-correct-box {
@@ -228,7 +233,7 @@
             color: #721c24;
         }
 
-        /* --- ESTILOS DO RELATÓRIO FINAL --- */
+        /* --- ESTILOS DO RELATÓRIO FINAL (Sem alteração) --- */
         #final-report h2, #final-report h3 { text-align: center; color: #333; }
         #final-report p { text-align: center; font-size: 1.2em; margin-bottom: 25px; }
         #report-details { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; font-size: 1.1em; }
@@ -248,11 +253,77 @@
         .resposta-correta-final { color: #155724; font-weight: bold; }
         .explicacao { font-style: italic; color: #555; margin-top: 10px !important; }
 
+        /* --- NOVO: Botões de Menu Mobile --- */
+        #menu-toggle, #menu-close {
+            display: none; /* Escondidos no desktop */
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001; /* Acima de tudo */
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 1.5em;
+            line-height: 40px;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        #menu-close {
+            top: 10px;
+            left: auto;
+            right: 15px;
+            z-index: 1002; /* Acima do menu */
+            font-size: 1.8em;
+            line-height: 38px;
+            display: none; /* Começa escondido */
+        }
+        
+        /* --- NOVO: Estilos Responsivos (Mobile) --- */
+        @media (max-width: 1024px) {
+            #menu-toggle {
+                display: block; /* Mostra o hamburger */
+            }
+
+            #side-menu {
+                position: fixed; /* Flutua sobre o conteúdo */
+                left: 0;
+                top: 0;
+                height: 100vh; /* Altura total */
+                z-index: 1000;
+                transform: translateX(-100%); /* Escondido fora da tela */
+                border-right: 2px solid #ccc; /* Mais ênfase no mobile */
+            }
+
+            #menu-close {
+                display: block; /* Mostra o "X" dentro do menu */
+            }
+
+            /* NOVO: Classe que o JS vai adicionar ao body */
+            body.side-menu-open #side-menu {
+                transform: translateX(0); /* Puxa o menu para dentro da tela */
+            }
+
+            #main-content {
+                padding: 20px 10px; /* Menos padding lateral no mobile */
+            }
+
+            #quiz-container {
+                padding: 20px; /* Menos padding no quiz */
+            }
+        }
+
     </style>
 </head>
 <body>
 
+    <div id="menu-toggle">&#9776;</div>
+
     <nav id="side-menu">
+        <div id="menu-close">&times;</div>
         <h3>Questões</h3>
         <div id="nav-container">
             </div>
@@ -1014,6 +1085,11 @@
     let answerLog = new Array(quizData.length).fill(null);
     let isCurrentQuestionAnswered = false; // Trava a questão atual
 
+    // --- NOVO: Lógica do Menu Mobile ---
+    function toggleMenu() {
+        document.body.classList.toggle('side-menu-open');
+    }
+
     // --- FUNÇÕES DE NAVEGAÇÃO ---
     function populateNavMenu() {
         const navContainer = document.getElementById('nav-container');
@@ -1022,9 +1098,14 @@
             navHTML += `<div class="nav-item" data-index="${i}">${i + 1}</div>`;
         }
         navContainer.innerHTML = navHTML;
+        
         navContainer.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', () => {
                 jumpToQuestion(parseInt(item.dataset.index));
+                // NOVO: Fecha o menu ao clicar em uma questão no mobile
+                if (window.innerWidth <= 1024) {
+                    toggleMenu();
+                }
             });
         });
     }
@@ -1327,6 +1408,11 @@
     // Inicia o quiz e popula o menu
     populateNavMenu();
     renderQuiz();
+
+    // --- NOVO: Event Listeners para Menu Mobile ---
+    document.getElementById('menu-toggle').addEventListener('click', toggleMenu);
+    document.getElementById('menu-close').addEventListener('click', toggleMenu);
+
 </script>
 
 </body>
