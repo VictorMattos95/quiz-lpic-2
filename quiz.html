@@ -1074,7 +1074,6 @@
         });
     }
 
-    // *** ALTERAÇÃO AQUI ***
     // 1. Embaralha a ORDEM das questões
     shuffleArray(quizData); 
     // 2. Embaralha as OPÇÕES DENTRO das questões
@@ -1084,7 +1083,7 @@
     const quizContainer = document.getElementById('quiz-container');
     let currentQuestionIndex = 0;
     let answerLog = new Array(quizData.length).fill(null);
-    let isCurrentQuestionAnswered = false; // Trava a questão atual
+    let isCurrentQuestionAnswered = false; 
 
     // --- Lógica do Menu Mobile ---
     function toggleMenu() {
@@ -1103,7 +1102,6 @@
         navContainer.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', () => {
                 jumpToQuestion(parseInt(item.dataset.index));
-                // Fecha o menu ao clicar em uma questão no mobile
                 if (window.innerWidth <= 1024) {
                     toggleMenu();
                 }
@@ -1132,10 +1130,10 @@
         }
     }
 
-    // --- FUNÇÕES PRINCIPAIS (Modificadas) ---
+    // --- FUNÇÕES PRINCIPAIS ---
 
     function renderQuiz() {
-        isCurrentQuestionAnswered = false; // Reseta a trava
+        isCurrentQuestionAnswered = false; 
         const currentQuestion = quizData[currentQuestionIndex];
         let optionsHTML = '';
 
@@ -1155,7 +1153,8 @@
             <div id="question-counter">Questão ${currentQuestionIndex + 1} de ${quizData.length}</div>
             <h2 id="question">${currentQuestion.pergunta}</h2>
             <div id="options-container">${optionsHTML}</div>
-            <div id="feedback-container"></div> <div id="controls">
+            <div id="feedback-container"></div> 
+            <div id="controls">
                 <button id="prev-btn">Anterior</button>
                 <button id="next-btn">${nextButtonText}</button>
             </div>
@@ -1202,66 +1201,51 @@
         const isMulti = Array.isArray(currentQuestion.respostaCorreta);
 
         if (isCurrentQuestionAnswered) {
-            // Caso 1: A questão JÁ FOI respondida/verificada. O botão é sempre "Próxima" ou "Finalizar".
             nextButton.textContent = (currentQuestionIndex === quizData.length - 1) ? 'Finalizar Quiz' : 'Próxima Questão';
             nextButton.disabled = false;
         
         } else if (currentQuestion.tipo === 'fill' || isMulti) {
-            // Caso 2: A questão é de preenchimento OU múltipla escolha, e AINDA NÃO FOI verificada.
-            // O botão deve ser "Verificar".
             nextButton.textContent = 'Verificar';
-            nextButton.disabled = !isAnswered; // Habilitado assim que o usuário digitar algo ou selecionar uma opção.
+            nextButton.disabled = !isAnswered; 
         
         } else {
-            // Caso 3: A questão é de escolha única e AINDA NÃO FOI respondida.
-            // O botão será "Próxima", mas ficará desabilitado. O clique na opção vai habilitá-lo.
             nextButton.textContent = (currentQuestionIndex === quizData.length - 1) ? 'Finalizar Quiz' : 'Próxima Questão';
             nextButton.disabled = true; 
         }
     }
 
     function selectOption(optionDiv, key, isMultipleChoice) {
-        if (isCurrentQuestionAnswered) return; // Trava a seleção após responder
+        if (isCurrentQuestionAnswered) return; 
 
         if (isMultipleChoice) {
-            // --- LÓGICA DE MÚLTIPLA ESCOLHA (Bug corrigido) ---
-            // Apenas alterna a seleção visual
             optionDiv.classList.toggle('selected');
         } else {
-            // --- LÓGICA DE ESCOLHA ÚNICA (Feedback imediato) ---
             document.querySelectorAll('.option.selected').forEach(el => el.classList.remove('selected'));
             optionDiv.classList.add('selected');
-            isCurrentQuestionAnswered = true; // Trava
+            isCurrentQuestionAnswered = true; 
         }
         
-        // Atualiza o log de respostas
         let selectedKeys = [];
         document.querySelectorAll('.option.selected').forEach(el => selectedKeys.push(el.dataset.key));
         answerLog[currentQuestionIndex] = selectedKeys.length > 0 ? selectedKeys : null;
         
         if (!isMultipleChoice) {
-            // Se for escolha única, verifica imediatamente
             checkAnswer();
-            updateSideMenuState(); // Marca como respondido
+            updateSideMenuState(); 
         }
         
-        updateUIState(); // Atualiza o estado do botão (habilita "Verificar" ou "Próxima")
+        updateUIState(); 
     }
 
-    /**
-     * Função central de clique do botão principal.
-     */
     function handleNextButtonClick() {
         const currentQuestion = quizData[currentQuestionIndex];
         const isMulti = Array.isArray(currentQuestion.respostaCorreta);
 
         if (!isCurrentQuestionAnswered && (currentQuestion.tipo === 'fill' || isMulti)) {
-            // 1. Clicou em "Verificar" (para 'fill' OU 'múltipla escolha')
             isCurrentQuestionAnswered = true;
             checkAnswer();
             updateSideMenuState();
         } else {
-            // 2. Clicou em "Próxima Questão" ou "Finalizar Quiz"
             if (currentQuestionIndex < quizData.length - 1) {
                 currentQuestionIndex++;
                 renderQuiz();
@@ -1269,7 +1253,7 @@
                 showFinalReport();
             }
         }
-        updateUIState(); // Atualiza o texto e estado do botão
+        updateUIState(); 
     }
 
     function navigatePrev() {
@@ -1279,15 +1263,12 @@
         }
     }
 
-    /**
-     * Função para verificar a resposta e exibir feedback.
-     */
     function checkAnswer() {
         const question = quizData[currentQuestionIndex];
         const userAnswer = answerLog[currentQuestionIndex];
         const correctAnswer = Array.isArray(question.respostaCorreta) ? question.respostaCorreta : [question.respostaCorreta];
         
-        const sortedUserAnswer = Array.isArray(userAnswer) ? [...userAnswer].sort() : [userAnswer];
+        const sortedUserAnswer = Array.isArray(userAnswer) ? [...userAnswer].sort() : (userAnswer ? [userAnswer] : []);
         const sortedCorrectAnswer = [...correctAnswer].sort();
         
         let isCorrect = false;
@@ -1316,19 +1297,18 @@
                 feedbackHTML = `<p><strong>Incorreto.</strong> ${question.explicacao}<br><strong>Resposta correta:</strong> <code>${correctAnswer[0]}</code></p>`;
             }
         } else {
-            // Desabilita todas as opções e aplica classes de feedback
             document.querySelectorAll('.option').forEach(option => {
-                option.style.pointerEvents = 'none'; // Desabilita clique
-                option.classList.remove('selected'); // Remove o azul de seleção
+                option.style.pointerEvents = 'none'; 
+                option.classList.remove('selected'); 
 
                 const key = option.dataset.key;
                 const isUserSelection = userAnswer && userAnswer.includes(key);
                 const isCorrectAnswer = correctAnswer.includes(key);
 
                 if (isCorrectAnswer) {
-                    option.classList.add('feedback-correct'); // Verde na(s) correta(s)
+                    option.classList.add('feedback-correct'); 
                 } else if (isUserSelection && !isCorrectAnswer) {
-                    option.classList.add('feedback-incorrect'); // Vermelho na(s) errada(s)
+                    option.classList.add('feedback-incorrect'); 
                 }
             });
         }
@@ -1336,28 +1316,68 @@
         feedbackContainer.innerHTML = feedbackHTML;
     }
 
+    // --- FUNÇÃO MODIFICADA PARA PONTUAÇÃO PARCIAL ---
     function showFinalReport() {
         document.getElementById('side-menu').style.display = 'none';
         document.getElementById('main-content').style.justifyContent = 'center';
 
-        let correctAnswers = 0;
+        let totalScore = 0; // 'totalScore' agora é um float
         let detailedReviewHTML = '';
 
         quizData.forEach((question, index) => {
             const userAnswer = answerLog[index];
             const correctAnswer = Array.isArray(question.respostaCorreta) ? question.respostaCorreta : [question.respostaCorreta];
-            const sortedUserAnswer = Array.isArray(userAnswer) ? [...userAnswer].sort() : [userAnswer];
-            const sortedCorrectAnswer = [...correctAnswer].sort();
             
-            let isCorrect = false;
+            let questionScore = 0.0;
+            let isFullyCorrect = false; // Para o feedback visual (Certo/Errado)
+
             if (question.tipo === 'fill') {
-                isCorrect = userAnswer && (userAnswer === correctAnswer[0]);
+                // Questões de preenchimento são tudo-ou-nada
+                isFullyCorrect = userAnswer && (userAnswer === correctAnswer[0]);
+                if (isFullyCorrect) {
+                    questionScore = 1.0;
+                }
             } else {
-                isCorrect = JSON.stringify(sortedUserAnswer) === JSON.stringify(sortedCorrectAnswer);
+                // Questões de múltipla escolha (podem ser únicas ou várias)
+                const isMulti = Array.isArray(question.respostaCorreta);
+                const totalCorrectNeeded = correctAnswer.length;
+                
+                // Garante que userAnswer seja um array, mesmo se for null ou string
+                const userAnswerAsArray = Array.isArray(userAnswer) ? [...userAnswer] : (userAnswer ? [userAnswer] : []);
+                const sortedCorrectAnswer = [...correctAnswer].sort();
+                
+                // Verifica acerto de 100% para o visual (antes da pontuação parcial)
+                const sortedUserAnswer = [...userAnswerAsArray].sort();
+                isFullyCorrect = JSON.stringify(sortedUserAnswer) === JSON.stringify(sortedCorrectAnswer);
+
+                if (!isMulti) {
+                    // Escolha única é tudo-ou-nada
+                    if (isFullyCorrect) {
+                        questionScore = 1.0;
+                    }
+                } else {
+                    // --- NOVA LÓGICA DE PONTUAÇÃO PARCIAL ---
+                    let correctSelectedCount = 0;
+                    let incorrectSelectedCount = 0;
+
+                    userAnswerAsArray.forEach(ans => {
+                        if (correctAnswer.includes(ans)) {
+                            correctSelectedCount++;
+                        } else {
+                            incorrectSelectedCount++;
+                        }
+                    });
+                    
+                    // Pontuação = (Acertos - Erros) / Total de Corretas
+                    // O mínimo é 0 (não há pontuação negativa por questão)
+                    let score = (correctSelectedCount - incorrectSelectedCount) / totalCorrectNeeded;
+                    questionScore = Math.max(0, score);
+                }
             }
 
-            if (isCorrect) correctAnswers++;
+            totalScore += questionScore; // Adiciona a pontuação da questão ao total
 
+            // Geração do relatório visual
             let userAnswerText;
             if (!userAnswer) {
                 userAnswerText = '<em>Não respondida</em>';
@@ -1368,31 +1388,34 @@
             }
             
             const correctAnswerText = correctAnswer.join(', ');
-            const resultClass = isCorrect ? 'resposta-certa' : 'resposta-errada';
+            const resultClass = isFullyCorrect ? 'resposta-certa' : 'resposta-errada';
 
             detailedReviewHTML += `
                 <div class="review-item">
                     <h4>${index + 1}. ${question.pergunta}</h4>
                     <p class="resposta-usuario ${resultClass}">Sua resposta: ${userAnswerText}</p>
-                    ${!isCorrect ? `<p class="resposta-correta-final">Resposta correta: ${correctAnswerText}</p>` : ''}
+                    ${!isFullyCorrect ? `<p class="resposta-correta-final">Resposta correta: ${correctAnswerText}</p>` : ''}
                     <p class="explicacao">${question.explicacao}</p>
                 </div>
             `;
         });
 
         const totalQuestions = quizData.length;
-        const incorrectAnswers = totalQuestions - correctAnswers;
-        const correctPercentage = ((correctAnswers / totalQuestions) * 100).toFixed(1);
-        const incorrectPercentage = ((incorrectAnswers / totalQuestions) * 100).toFixed(1);
-        const finalGrade = ((correctAnswers / totalQuestions) * 10).toFixed(1);
+        
+        // Cálculos finais usam 'totalScore' (float)
+        const correctAnswersFloat = totalScore;
+        const incorrectAnswersFloat = totalQuestions - totalScore;
+        const correctPercentage = ((totalScore / totalQuestions) * 100).toFixed(1);
+        const incorrectPercentage = (100.0 - parseFloat(correctPercentage)).toFixed(1);
+        const finalGrade = ((totalScore / totalQuestions) * 10).toFixed(1);
 
         quizContainer.innerHTML = `
             <div id="final-report">
                 <h2>Relatório Final</h2>
                 <p>Confira o seu desempenho detalhado abaixo:</p>
                 <div id="report-details">
-                    <div class="report-item report-item-acertos"><strong>${correctAnswers}</strong><span>Acertos (${correctPercentage}%)</span></div>
-                    <div class="report-item report-item-erros"><strong>${incorrectAnswers}</strong><span>Erros (${incorrectPercentage}%)</span></div>
+                    <div class="report-item report-item-acertos"><strong>${correctAnswersFloat.toFixed(1)}</strong><span>Pontos (de ${totalQuestions})</span></div>
+                    <div class="report-item report-item-erros"><strong>${incorrectAnswersFloat.toFixed(1)}</strong><span>Pontos Perdidos</span></div>
                     <div class="report-item report-item-nota" style="grid-column: 1 / -1;"><strong>${finalGrade} / 10.0</strong><span>Nota Final</span></div>
                 </div>
                 <div id="detailed-review">
