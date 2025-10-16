@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz Interativo de Linux - Modo Prova</title>
     <style>
-        /* --- NOVOS ESTILOS DE LAYOUT --- */
+        /* --- ESTILOS DE LAYOUT --- */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background-color: #f4f7f6;
-            display: flex; /* Alterado */
+            display: flex;
             margin: 0;
             min-height: 100vh;
             box-sizing: border-box;
@@ -36,12 +36,12 @@
 
         #nav-container {
             flex-grow: 1;
-            overflow-y: auto; /* Permite rolar os botões */
+            overflow-y: auto;
             display: grid;
-            grid-template-columns: repeat(5, 1fr); /* 5 botões por linha */
+            grid-template-columns: repeat(5, 1fr);
             gap: 8px;
-            align-content: start; /* Alinha os botões no topo */
-            padding-right: 10px; /* Espaço para a barra de rolagem */
+            align-content: start;
+            padding-right: 10px;
         }
 
         .nav-item {
@@ -51,7 +51,7 @@
             height: 35px;
             font-size: 0.9em;
             border: 1px solid #ddd;
-            border-radius: 50%; /* Botões redondos */
+            border-radius: 50%;
             cursor: pointer;
             transition: all 0.2s ease;
             font-weight: bold;
@@ -83,7 +83,7 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
-            overflow-y: auto; /* Permite rolar o quiz se for alto */
+            overflow-y: auto;
         }
         
         /* --- ESTILOS ANTIGOS DO QUIZ --- */
@@ -178,7 +178,57 @@
             word-wrap: break-word;
         }
         
-        /* --- ESTILOS PARA O RELATÓRIO FINAL --- */
+        /* --- NOVOS ESTILOS DE FEEDBACK --- */
+        #feedback-container {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            line-height: 1.5;
+            display: none; /* Começa escondido */
+        }
+        
+        #feedback-container.feedback-correct-box {
+            background-color: #e6ffed;
+            border: 1px solid #155724;
+            color: #155724;
+            display: block;
+        }
+        
+        #feedback-container.feedback-incorrect-box {
+            background-color: #ffebeb;
+            border: 1px solid #721c24;
+            color: #721c24;
+            display: block;
+        }
+        
+        .option.feedback-correct {
+            background-color: #e6ffed;
+            border-color: #155724;
+            color: #155724;
+            font-weight: bold;
+        }
+        
+        .option.feedback-incorrect {
+            background-color: #ffebeb;
+            border-color: #721c24;
+            color: #721c24;
+            font-weight: bold;
+        }
+        
+        input.feedback-correct {
+            background-color: #e6ffed;
+            border-color: #155724;
+            color: #155724;
+        }
+        
+        input.feedback-incorrect {
+            background-color: #ffebeb;
+            border-color: #721c24;
+            color: #721c24;
+        }
+
+        /* --- ESTILOS DO RELATÓRIO FINAL --- */
         #final-report h2, #final-report h3 { text-align: center; color: #333; }
         #final-report p { text-align: center; font-size: 1.2em; margin-bottom: 25px; }
         #report-details { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; font-size: 1.1em; }
@@ -934,37 +984,20 @@
 
     function shuffleQuizData(data) {
         const labels = ['A', 'B', 'C', 'D', 'E', 'F']; 
-
         data.forEach(question => {
-            if (question.tipo === 'fill' || !question.opcoes) {
-                return;
-            }
-
-            const originalAnswers = Array.isArray(question.respostaCorreta) 
-                ? question.respostaCorreta 
-                : [question.respostaCorreta];
-            
-            let optionsList = Object.entries(question.opcoes).map(([key, text]) => ({
-                text: text,
-                isCorrect: originalAnswers.includes(key)
-            }));
-
+            if (question.tipo === 'fill' || !question.opcoes) { return; }
+            const originalAnswers = Array.isArray(question.respostaCorreta) ? question.respostaCorreta : [question.respostaCorreta];
+            let optionsList = Object.entries(question.opcoes).map(([key, text]) => ({ text: text, isCorrect: originalAnswers.includes(key) }));
             shuffleArray(optionsList);
-
             const newOpcoes = {};
             const newRespostaCorreta = [];
             const originalWasArray = Array.isArray(question.respostaCorreta);
-
             optionsList.forEach((option, index) => {
                 const newKey = labels[index];
                 newOpcoes[newKey] = option.text;
-                if (option.isCorrect) {
-                    newRespostaCorreta.push(newKey);
-                }
+                if (option.isCorrect) { newRespostaCorreta.push(newKey); }
             });
-
             question.opcoes = newOpcoes;
-            
             if (originalWasArray || newRespostaCorreta.length > 1) {
                 question.respostaCorreta = newRespostaCorreta;
             } else {
@@ -979,12 +1012,9 @@
     const quizContainer = document.getElementById('quiz-container');
     let currentQuestionIndex = 0;
     let answerLog = new Array(quizData.length).fill(null);
+    let isCurrentQuestionAnswered = false; // Trava a questão atual
 
-    // --- NOVAS FUNÇÕES DE NAVEGAÇÃO ---
-
-    /**
-     * Popula o menu lateral de navegação com botões para cada questão.
-     */
+    // --- FUNÇÕES DE NAVEGAÇÃO ---
     function populateNavMenu() {
         const navContainer = document.getElementById('nav-container');
         let navHTML = '';
@@ -992,8 +1022,6 @@
             navHTML += `<div class="nav-item" data-index="${i}">${i + 1}</div>`;
         }
         navContainer.innerHTML = navHTML;
-
-        // Adiciona event listeners aos novos botões
         navContainer.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', () => {
                 jumpToQuestion(parseInt(item.dataset.index));
@@ -1001,10 +1029,6 @@
         });
     }
 
-    /**
-     * Pula para uma questão específica com base no índice.
-     * @param {number} index - O índice da questão (0 a 59).
-     */
     function jumpToQuestion(index) {
         if (index >= 0 && index < quizData.length) {
             currentQuestionIndex = index;
@@ -1012,32 +1036,24 @@
         }
     }
 
-    /**
-     * Atualiza o estado visual (cores) do menu de navegação.
-     * Marca a questão atual e as questões já respondidas.
-     */
     function updateSideMenuState() {
         for (let i = 0; i < quizData.length; i++) {
             const item = document.querySelector(`.nav-item[data-index="${i}"]`);
             if (!item) continue;
-
-            // Limpa estados anteriores
             item.classList.remove('current', 'answered');
-
-            // Adiciona classe 'answered' se a resposta não for nula
             if (answerLog[i] !== null) {
                 item.classList.add('answered');
             }
-            // Adiciona classe 'current' se for a questão ativa
             if (i === currentQuestionIndex) {
                 item.classList.add('current');
             }
         }
     }
 
-    // --- FUNÇÕES EXISTENTES (MODIFICADAS) ---
+    // --- FUNÇÕES PRINCIPAIS (Modificadas) ---
 
     function renderQuiz() {
+        isCurrentQuestionAnswered = false; // Reseta a trava
         const currentQuestion = quizData[currentQuestionIndex];
         let optionsHTML = '';
 
@@ -1051,13 +1067,13 @@
             }
         }
 
-        const nextButtonText = (currentQuestionIndex === quizData.length - 1) ? 'Finalizar Quiz' : 'Responder e Próxima';
+        const nextButtonText = (currentQuestionIndex === quizData.length - 1) ? 'Finalizar Quiz' : 'Próxima Questão';
 
         quizContainer.innerHTML = `
             <div id="question-counter">Questão ${currentQuestionIndex + 1} de ${quizData.length}</div>
             <h2 id="question">${currentQuestion.pergunta}</h2>
             <div id="options-container">${optionsHTML}</div>
-            <div id="controls">
+            <div id="feedback-container"></div> <div id="controls">
                 <button id="prev-btn">Anterior</button>
                 <button id="next-btn">${nextButtonText}</button>
             </div>
@@ -1065,12 +1081,12 @@
         
         addEventListeners();
         updateUIState();
-        updateSideMenuState(); // MODIFICADO: Atualiza o menu lateral
+        updateSideMenuState();
     }
 
     function addEventListeners() {
         document.getElementById('prev-btn').addEventListener('click', navigatePrev);
-        document.getElementById('next-btn').addEventListener('click', logAnswerAndAdvance);
+        document.getElementById('next-btn').addEventListener('click', handleNextButtonClick); 
 
         const currentQuestion = quizData[currentQuestionIndex];
         const fillAnswerInput = document.getElementById('fill-answer');
@@ -1080,11 +1096,10 @@
             fillAnswerInput.addEventListener('input', (event) => {
                 answerLog[currentQuestionIndex] = event.target.value.trim() || null;
                 updateUIState();
-                updateSideMenuState(); // MODIFICADO: Atualiza o menu ao digitar
             });
             fillAnswerInput.addEventListener('keyup', (event) => {
                 if (event.key === 'Enter' && !document.getElementById('next-btn').disabled) {
-                    logAnswerAndAdvance();
+                    handleNextButtonClick();
                 }
             });
         } else {
@@ -1098,33 +1113,81 @@
 
     function updateUIState() {
         document.getElementById('prev-btn').disabled = currentQuestionIndex === 0;
+        
+        const nextButton = document.getElementById('next-btn');
         const isAnswered = !!answerLog[currentQuestionIndex];
-        document.getElementById('next-btn').disabled = !isAnswered;
+        const currentQuestion = quizData[currentQuestionIndex];
+        const isMulti = Array.isArray(currentQuestion.respostaCorreta);
+
+        if (isCurrentQuestionAnswered) {
+            // Caso 1: A questão JÁ FOI respondida/verificada. O botão é sempre "Próxima" ou "Finalizar".
+            nextButton.textContent = (currentQuestionIndex === quizData.length - 1) ? 'Finalizar Quiz' : 'Próxima Questão';
+            nextButton.disabled = false;
+        
+        } else if (currentQuestion.tipo === 'fill' || isMulti) {
+            // Caso 2: A questão é de preenchimento OU múltipla escolha, e AINDA NÃO FOI verificada.
+            // O botão deve ser "Verificar".
+            nextButton.textContent = 'Verificar';
+            nextButton.disabled = !isAnswered; // Habilitado assim que o usuário digitar algo ou selecionar uma opção.
+        
+        } else {
+            // Caso 3: A questão é de escolha única e AINDA NÃO FOI respondida.
+            // O botão será "Próxima", mas ficará desabilitado. O clique na opção vai habilitá-lo.
+            nextButton.textContent = (currentQuestionIndex === quizData.length - 1) ? 'Finalizar Quiz' : 'Próxima Questão';
+            nextButton.disabled = true; 
+        }
     }
 
     function selectOption(optionDiv, key, isMultipleChoice) {
+        if (isCurrentQuestionAnswered) return; // Trava a seleção após responder
+
         if (isMultipleChoice) {
+            // --- LÓGICA DE MÚLTIPLA ESCOLHA (Bug corrigido) ---
+            // Apenas alterna a seleção visual
             optionDiv.classList.toggle('selected');
         } else {
+            // --- LÓGICA DE ESCOLHA ÚNICA (Feedback imediato) ---
             document.querySelectorAll('.option.selected').forEach(el => el.classList.remove('selected'));
             optionDiv.classList.add('selected');
+            isCurrentQuestionAnswered = true; // Trava
         }
         
+        // Atualiza o log de respostas
         let selectedKeys = [];
         document.querySelectorAll('.option.selected').forEach(el => selectedKeys.push(el.dataset.key));
         answerLog[currentQuestionIndex] = selectedKeys.length > 0 ? selectedKeys : null;
         
-        updateUIState();
-        updateSideMenuState(); // MODIFICADO: Atualiza o menu ao selecionar
+        if (!isMultipleChoice) {
+            // Se for escolha única, verifica imediatamente
+            checkAnswer();
+            updateSideMenuState(); // Marca como respondido
+        }
+        
+        updateUIState(); // Atualiza o estado do botão (habilita "Verificar" ou "Próxima")
     }
 
-    function logAnswerAndAdvance() {
-        if (currentQuestionIndex < quizData.length - 1) {
-            currentQuestionIndex++;
-            renderQuiz();
+    /**
+     * Função central de clique do botão principal.
+     */
+    function handleNextButtonClick() {
+        const currentQuestion = quizData[currentQuestionIndex];
+        const isMulti = Array.isArray(currentQuestion.respostaCorreta);
+
+        if (!isCurrentQuestionAnswered && (currentQuestion.tipo === 'fill' || isMulti)) {
+            // 1. Clicou em "Verificar" (para 'fill' OU 'múltipla escolha')
+            isCurrentQuestionAnswered = true;
+            checkAnswer();
+            updateSideMenuState();
         } else {
-            showFinalReport();
+            // 2. Clicou em "Próxima Questão" ou "Finalizar Quiz"
+            if (currentQuestionIndex < quizData.length - 1) {
+                currentQuestionIndex++;
+                renderQuiz();
+            } else {
+                showFinalReport();
+            }
         }
+        updateUIState(); // Atualiza o texto e estado do botão
     }
 
     function navigatePrev() {
@@ -1134,8 +1197,64 @@
         }
     }
 
+    /**
+     * Função para verificar a resposta e exibir feedback.
+     */
+    function checkAnswer() {
+        const question = quizData[currentQuestionIndex];
+        const userAnswer = answerLog[currentQuestionIndex];
+        const correctAnswer = Array.isArray(question.respostaCorreta) ? question.respostaCorreta : [question.respostaCorreta];
+        
+        const sortedUserAnswer = Array.isArray(userAnswer) ? [...userAnswer].sort() : [userAnswer];
+        const sortedCorrectAnswer = [...correctAnswer].sort();
+        
+        let isCorrect = false;
+        if (question.tipo === 'fill') {
+            isCorrect = userAnswer && (userAnswer === correctAnswer[0]);
+        } else {
+            isCorrect = JSON.stringify(sortedUserAnswer) === JSON.stringify(sortedCorrectAnswer);
+        }
+
+        const feedbackContainer = document.getElementById('feedback-container');
+        let feedbackHTML = `<p><strong>${isCorrect ? 'Correto!' : 'Incorreto.'}</strong> ${question.explicacao}</p>`;
+        
+        if (isCorrect) {
+            feedbackContainer.className = 'feedback-correct-box';
+        } else {
+            feedbackContainer.className = 'feedback-incorrect-box';
+        }
+
+        if (question.tipo === 'fill') {
+            const input = document.getElementById('fill-answer');
+            input.disabled = true;
+            if (isCorrect) {
+                input.classList.add('feedback-correct');
+            } else {
+                input.classList.add('feedback-incorrect');
+                feedbackHTML = `<p><strong>Incorreto.</strong> ${question.explicacao}<br><strong>Resposta correta:</strong> <code>${correctAnswer[0]}</code></p>`;
+            }
+        } else {
+            // Desabilita todas as opções e aplica classes de feedback
+            document.querySelectorAll('.option').forEach(option => {
+                option.style.pointerEvents = 'none'; // Desabilita clique
+                option.classList.remove('selected'); // Remove o azul de seleção
+
+                const key = option.dataset.key;
+                const isUserSelection = userAnswer && userAnswer.includes(key);
+                const isCorrectAnswer = correctAnswer.includes(key);
+
+                if (isCorrectAnswer) {
+                    option.classList.add('feedback-correct'); // Verde na(s) correta(s)
+                } else if (isUserSelection && !isCorrectAnswer) {
+                    option.classList.add('feedback-incorrect'); // Vermelho na(s) errada(s)
+                }
+            });
+        }
+        
+        feedbackContainer.innerHTML = feedbackHTML;
+    }
+
     function showFinalReport() {
-        // MODIFICADO: Esconde o menu lateral e centraliza o relatório
         document.getElementById('side-menu').style.display = 'none';
         document.getElementById('main-content').style.justifyContent = 'center';
 
@@ -1145,7 +1264,6 @@
         quizData.forEach((question, index) => {
             const userAnswer = answerLog[index];
             const correctAnswer = Array.isArray(question.respostaCorreta) ? question.respostaCorreta : [question.respostaCorreta];
-            
             const sortedUserAnswer = Array.isArray(userAnswer) ? [...userAnswer].sort() : [userAnswer];
             const sortedCorrectAnswer = [...correctAnswer].sort();
             
@@ -1206,7 +1324,7 @@
         `;
     }
 
-    // MODIFICADO: Inicia o quiz e popula o menu
+    // Inicia o quiz e popula o menu
     populateNavMenu();
     renderQuiz();
 </script>
