@@ -360,7 +360,7 @@
       },
       {
         "id": 3,
-        "pergunta": "Qual comando é usado para enviar mensagens a todos os usuários Lohia, atualmente logados? (Especifique SOMENTE o comando, sem caminho ou parâmetros.)",
+        "pergunta": "Qual comando é usado para enviar mensagens a todos os usuários conectados no momento? (Especifique SOMENTE o comando, sem nenhum caminho ou parâmetro.)",
         "tipo": "fill",
         "respostaCorreta": "wall",
         "explicacao": "O comando 'wall' (write to all) envia uma mensagem para o terminal de todos os usuários que estão logados no sistema."
@@ -382,7 +382,7 @@
         "id": 5,
         "pergunta": "Um usuário comum acabou de executar <code>./configure && make && make install</code> para compilar e instalar um programa. No entanto, a instalação falha. O que pode ser feito para instalar o programa? (Escolha duas opções.)",
         "opcoes": {
-          "A": "Instalar os binários manually com <code>suinstall</code>",
+          "A": "Instalar os binários manualmente com <code>suinstall</code>",
           "B": "Executar <code>make install</code> com privilégios de root",
           "C": "Não executar <code>./configure</code> para manter a configuração padrão para uma instalação correta",
           "D": "Executar <code>./configure</code> novamente com a opção <code>--prefix</code>, onde o usuário tem permissão de gravação",
@@ -529,7 +529,7 @@
       },
       {
         "id": 18,
-        "pergunta": "Qual é a finalidade de uma unidade de montagem do sistema (system mount unit)?",
+        "pergunta": "Qual é a finalidade de uma unidade de montagem do sistema?",
         "opcoes": {
           "A": "Ela é usada pelo comando systemd-mount e permite que os usuários montem partições em pontos de montagem de sua escolha.",
           "B": "Ela é usada apenas para montar sistemas de arquivos de rede em pontos de montagem locais. Não pode ser usada para mídia local.",
@@ -638,7 +638,7 @@
         "id": 27,
         "pergunta": "Se o arquivo que contém o kernel do Linux for excluído, o que acontece quando o sistema inicializa?",
         "opcoes": {
-          "A": "O sistema inicia normally, pois o gerenciador de inicialização copia o kernel para o registro mestre de inicialização do disco rígido.",
+          "A": "O sistema inicia normalmente, pois o gerenciador de inicialização copia o kernel para o registro mestre de inicialização do disco rígido",
           "B": "Em vez do kernel, o initramfs é carregado e instruído a montar o sistema de arquivos raiz e reinstalar o kernel a partir do pacote original ou da fonte.",
           "C": "O gerenciador de inicialização monta o sistema de arquivos raiz como somente leitura e inicia /bin/sh diretamente para permitir que o administrador reinstale o kernel.",
           "D": "Sem um kernel, o sistema não inicializa e, dependendo do gerenciador de inicialização, um erro é exibido."
@@ -740,8 +740,8 @@
         "pergunta": "Após baixar o <code>patch-4.6.4.xz</code> de http://kernel.org, quais são os próximos passos para preparar a compilação de um kernel Linux versão 4.6.4? (Escolha dois.)",
         "opcoes": {
           "A": "Descompacte o arquivo e mova o diretório resultante para <code>/usr/src/linux</code>",
-          "B": "Aplique o arquivo de patch ao diretório de origem do kernel que contém la versão 4.6.0 do kernel",
-          "C": "Aplique o arquivo de patch ao diretório de origem do kernel que contém la versão 4.6.3 do kernel",
+          "B": "Aplique o arquivo de patch ao diretório de origem do kernel que contém a versão 4.6.0 do kernel",
+          "C": "Aplique o arquivo de patch ao diretório de origem do kernel que contém a versão 4.6.3 do kernel",
           "D": "Descompacte o arquivo usando <code>xz</code> para obter o arquivo de patch descompactado",
           "E": "Use <code>patch</code> para aplicar o arquivo de patch descompactado ao diretório de origem de qualquer versão anterior do kernel"
         },
@@ -750,7 +750,7 @@
       },
       {
         "id": 37,
-        "pergunta": "Após compilar e instalar manually um novo kernel, o que deve ser feito em relação ao <code>initramfs</code>?",
+        "pergunta": "Após compilar e instalar manualmente um novo kernel, o que deve ser feito em relação ao <code>initramfs</code>?",
         "opcoes": {
           "A": "O initramfs é independente do kernel e não deve ser modificado, a menos que a configuração de hardware da máquina tenha sido alterada.",
           "B": "Como o initramfs contém módulos do kernel, um novo initramfs deve ser criado para o novo kernel.",
